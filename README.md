@@ -4,6 +4,7 @@ Gnome Shell extension to search for movies in TheMovieDB API.
 The search can be made both in your original language or the original movie title. In both cases, the result
 will appear with the locale configured in your system.
 
+![Snapshot](http://i.imgur.com/YcVLqkd.png)
 
 Use
 ====
