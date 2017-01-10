@@ -14,6 +14,7 @@ Use
 
 This is going to be removed in some point, as you don't have to remember string codes when searching for content
 
+* Clicking on a item opens its IMDB page on your default browser
 
 TODO
 ===
