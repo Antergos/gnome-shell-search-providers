@@ -1,0 +1,10 @@
+{
+  "description": "Movies and TvShows Search Provider by Antergos",
+  "name": "TheMovieDB Search Provider for TvShows",
+  "shell-version": [
+    "3.22"
+  ],
+  "url": "https://github.com/Antergos/gnome-shell-search-providers",
+  "uuid": "themoviedb-tvshows-search-provider@antergos.com",
+  "version": 1.0
+}
