@@ -1,0 +1,10 @@
+{
+  "description": "Movies and TvShows Search Provider by Antergos",
+  "name": "TheMovieDB Search Provider",
+  "shell-version": [
+    "3.22"
+  ],
+  "url": "https://github.com/bmansurov/wikidata-search-provider",
+  "uuid": "themoviedb-search-provider@antergos.com",
+  "version": 1.0
+}
