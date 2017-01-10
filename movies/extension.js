@@ -29,13 +29,14 @@ const TheMovieDBSearchProvider = new Lang.Class({
     Name: 'TheMovieDBSearchProvider',
 
     _init: function() {
-        var self = this;
+        let self = this;
 
         // Create cache
-        var cache_folder = Gio.file_new_for_path(CACHE_FOLDER);
+        let cache_folder = Gio.file_new_for_path(CACHE_FOLDER);
         if (!cache_folder.query_exists(null)) {
             cache_folder.make_directory(null);
         }
+
 
         // Use the default app for opening https links as the app for
         // launching full search.
@@ -180,10 +181,43 @@ const TheMovieDBSearchProvider = new Lang.Class({
 
 
     /**
-     * Launch the search in the default app (i.e. browser)
-     * @param {String[]} terms
+     * Return meta from result
+     * @param {String} identifier
+     * @returns {{id: String, name: String, description: String, createIcon: Function}}
+     * @private
      */
-    launchSearch: function (terms) {
+    _getResultMeta: function(identifier, callback) {
+        let result,
+            meta;
+
+        // return predefined message if it exists
+        if (identifier in this._messages) {
+            result = this._messages[identifier];
+        } else {
+            meta = this.resultsMap.get(identifier);
+
+            let apiPosterPath = this._api.apiPosterPath,
+                apiPosterSize = this._api.apiPosterSize;
+
+            let icon_path = meta.poster_path ? meta.poster_path : '',
+                icon_url = meta.poster_path ? apiPosterPath + '/' + apiPosterSize + '/' + meta.poster_path : '',
+                release_date = meta.release_date.split("-");
+
+            result = {
+                id: meta.id,
+                name: meta.title + ' (' + release_date[0] + ')',
+                description : meta.overview,
+                createIcon: Lang.bind(this, this._cachePoster, icon_path, icon_url, callback)
+            };
+        }
+        return result;
+    },
+
+
+    /**
+     * Launch the search in the default app (i.e. browser)
+     */
+    launchSearch: function () {
         Util.trySpawnCommandLine(
             "xdg-open " + this._api.providerUrl);
     },
@@ -193,6 +227,7 @@ const TheMovieDBSearchProvider = new Lang.Class({
      * @param {String} identifier
      * @param {Array} terms
      * @param timestamp
+     * @param callback
      */
     activateResult: function(identifier, terms, timestamp, callback) {
         let item_id;
@@ -234,39 +269,6 @@ const TheMovieDBSearchProvider = new Lang.Class({
     },
 
 
-    /**
-     * Return meta from result
-     * @param {String} identifier
-     * @returns {{id: String, name: String, description: String, createIcon: Function}}
-     * @private
-     */
-    _getResultMeta: function(identifier, callback) {
-        let result,
-            meta;
-        // return predefined message if it exists
-        if (identifier in this._messages) {
-            result = this._messages[identifier];
-        } else {
-            // TODO: check for messages that don't exist, show generic error message
-            meta = this.resultsMap.get(identifier);
-
-            var apiPosterPath = this._api.apiPosterPath,
-                apiPosterSize = this._api.apiPosterSize;
-
-            var icon_path = meta.poster_path ? meta.poster_path : '',
-                icon_url = meta.poster_path ? apiPosterPath + '/' + apiPosterSize + '/' + meta.poster_path : '',
-                release_date = meta.release_date.split("-");
-
-            result = {
-                id: meta.id,
-                name: meta.title + ' (' + release_date[0] + ')',
-                description : meta.overview,
-                createIcon: Lang.bind(this, this._cachePoster, icon_path, icon_url, callback)
-            };
-        }
-        return result;
-    },
-
 
     /**
      * Return query string from terms array
@@ -284,6 +286,7 @@ const TheMovieDBSearchProvider = new Lang.Class({
      * @param {null|String} error
      * @param {Object|null} result
      * @param {Function} callback
+     * @param {Function} timeoutId
      * @private
      */
     _getResultSet: function (error, result, callback, timeoutId) {
@@ -307,7 +310,7 @@ const TheMovieDBSearchProvider = new Lang.Class({
     },
 
 
-    _openLink: function(error, result, callback, timeout) {
+    _openLink: function(error, result) {
         if (result) {
             Util.trySpawnCommandLine(
                 "xdg-open " + this._api.imdbUrl + result.imdb_id + '/');
@@ -325,7 +328,7 @@ const TheMovieDBSearchProvider = new Lang.Class({
     },
 
     _cachePoster: function (object, image_name, url, callback) {
-        var _httpSession = new Soup.SessionAsync();
+        let _httpSession = new Soup.SessionAsync();
 
         if(url && typeof url === 'string' && image_name !== '') {
             Soup.Session.prototype.add_feature.call(_httpSession, new Soup.ProxyResolverDefault());
@@ -336,7 +339,7 @@ const TheMovieDBSearchProvider = new Lang.Class({
             if(!file.query_exists(null)) {
                 let fstream = file.replace(null, false, Gio.FileCreateFlags.NONE, null);
 
-                var request = Soup.Message.new('GET', url);
+                let request = Soup.Message.new('GET', url);
                 request.connect('got_chunk', Lang.bind(this, function(message, chunk){
                     // write each chunk to file
                     fstream.write(chunk.get_data(), null, chunk.length);
