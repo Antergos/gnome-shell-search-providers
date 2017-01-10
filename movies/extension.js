@@ -46,7 +46,7 @@ const TheMovieDBSearchProvider = new Lang.Class({
             return _('TheMovieDB Search Provider');
         };
         this.appInfo.get_icon = function() {
-            return Gio.icon_new_for_string(Me.path + "/movies.svg");
+            return Gio.icon_new_for_string(Me.path + "/icon.svg");
         };
 
         // Custom messages that will be shown as search results
@@ -201,11 +201,13 @@ const TheMovieDBSearchProvider = new Lang.Class({
 
             let icon_path = meta.poster_path ? meta.poster_path : '',
                 icon_url = meta.poster_path ? apiPosterPath + '/' + apiPosterSize + '/' + meta.poster_path : '',
-                release_date = meta.release_date.split("-");
+                release_date = meta.release_date.split("-"),
+                release_date_beautify = release_date[0] ? ' - (' + release_date[0] + ')' : '',
+                vote_average = meta.vote_average >= 1 ? ' - ' + meta.vote_average : '';
 
             result = {
                 id: meta.id,
-                name: meta.title + ' (' + release_date[0] + ')',
+                name: meta.title + release_date_beautify + vote_average,
                 description : meta.overview,
                 createIcon: Lang.bind(this, this._cachePoster, icon_path, icon_url, callback)
             };
