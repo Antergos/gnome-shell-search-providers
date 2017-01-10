@@ -8,7 +8,8 @@ will appear with the locale configured in your system.
 Use
 ====
 * Right now, for searching movies, there's a string trigger:
-> mv fight club
+
+>mv fight club
 
 This is going to be removed in some point, as you don't have to remember string codes when searching for content
 
